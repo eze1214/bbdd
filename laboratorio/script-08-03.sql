@@ -3,6 +3,7 @@
 drop table proveedores;
 
 create table proveedores (
+	codigo_proveedor int,
 	nombre_del_proveedor text,
 	fecha_de_alta date,
 	localidad text,
@@ -11,13 +12,18 @@ create table proveedores (
 	email text,
 	web text,
 	tel text,
-	nombre_del_rubro text
+	nombre_del_rubro text,
+	CONSTRAINT pk_proveedores_codigo_proveedor PRIMARY KEY (codigo_proveedor)
 );
 
-insert into proveedores values ('proveedor 1', now(), 'CABA', '1118', 'Buenos Aires', 'tomas@mail.com', 'www.tomas.com', '4555-5555', 'Software');
+--insert into proveedores values (null, 'proveedor 1', now(), 'CABA', '1118', 'Buenos Aires', 'tomas@mail.com', 'www.tomas.com', '4555-5555', 'Software');
+
+insert into proveedores values (1, 'proveedor 1', now(), 'CABA', '1118', 'Buenos Aires', 'tomas@mail.com', 'www.tomas.com', '4555-5555', 'Software');
 
 insert into proveedores 
-(	nombre_del_proveedor,
+(	
+	codigo_proveedor,
+	nombre_del_proveedor,
 	fecha_de_alta,
 	localidad,
 	cp,
@@ -27,11 +33,14 @@ insert into proveedores
 	tel,
 	nombre_del_rubro
 )
-values ('proveedor 2', now(), 'Pilar', '4587', 'Buenos Aires', 'mail@mail.com', 'rotoplast.com', '4555-7899', 'Plasticos');
+values (2, 'proveedor 2', now(), 'Pilar', '4587', 'Buenos Aires', 'mail@mail.com', 'rotoplast.com', '4555-7899', 'Plasticos');
 
 
-insert into proveedores 
-(	nombre_del_proveedor,
+
+insert into proveedores
+(	
+	codigo_proveedor,
+	nombre_del_proveedor,
 	fecha_de_alta,
 	localidad,
 	cp,
@@ -41,10 +50,12 @@ insert into proveedores
 	tel,
 	nombre_del_rubro
 )
-values ('proveedor 3', now(), 'CABA', '6587', 'Buenos Aires', 'mail@mail.com', 'web.com', '4216-1578', 'Comercio');
+values (3, 'proveedor 3', now(), 'CABA', '6587', 'Buenos Aires', 'mail@mail.com', 'web.com', '4216-1578', 'Comercio');
 
 insert into proveedores 
-(	nombre_del_proveedor,
+(	
+	codigo_proveedor,
+	nombre_del_proveedor,
 	fecha_de_alta,
 	localidad,
 	cp,
@@ -54,10 +65,12 @@ insert into proveedores
 	tel,
 	nombre_del_rubro
 )
-values ('proveedor 4', now(), 'CABA', '6587', 'Buenos Aires', 'otro@otro.com', 'web.com', '4216-7411', 'Bancario');
+values (4, 'proveedor 4', now(), 'CABA', '6587', 'Buenos Aires', 'otro@otro.com', 'web.com', '4216-7411', 'Bancario');
 
-insert into proveedores 
-(	nombre_del_proveedor,
+insert into proveedores
+(	
+	codigo_proveedor,
+	nombre_del_proveedor,
 	fecha_de_alta,
 	localidad,
 	cp,
@@ -67,10 +80,12 @@ insert into proveedores
 	tel,
 	nombre_del_rubro
 )
-values ('proveedor 5', now(), 'CABA', '6587', 'Buenos Aires', 'otro@otro.com', 'web.com', '4216-7411', 'Plasticos');
+values (5, 'proveedor 5', now(), 'CABA', '6587', 'Buenos Aires', 'otro@otro.com', 'web.com', '4216-7411', 'Plasticos');
 
 insert into proveedores 
-(	nombre_del_proveedor,
+(	
+	codigo_proveedor,
+	nombre_del_proveedor,
 	fecha_de_alta,
 	localidad,
 	cp,
@@ -80,16 +95,18 @@ insert into proveedores
 	tel,
 	nombre_del_rubro
 )
-values ('proveedor 6', now(), 'Pilar', '6587', 'Buenos Aires', 'otro@otro.com', 'web.com', '4216-7411', 'Bancario');
+values (6, 'proveedor 6', now(), 'Pilar', '6587', 'Buenos Aires', 'otro@otro.com', 'web.com', '4216-7411', 'Bancario');
 
-insert into proveedores values ('proveedor x', now(), 'Ramos Mejia', '125835', 'Buenos Aires', 'mail@algo.com', 'otrodom.com', '2526-5025', 'Medicina');
-insert into proveedores values ('proveedor x', now(), 'CABA', '1262', 'Buenos Aires', 'mail@algo.com', 'dominio.com', '2526-5025', 'Medicina');
+insert into proveedores values (7, 'proveedor x', now(), 'Ramos Mejia', '125835', 'Buenos Aires', 'mail@algo.com', 'otrodom.com', '2526-5025', 'Medicina');
+insert into proveedores values (8, 'proveedor x', now(), 'CABA', '1262', 'Buenos Aires', 'mail@algo.com', 'dominio.com', '2526-5025', 'Medicina');
 
-insert into proveedores values ('proveedor pint', now(), 'Ramos Mejia', '1262', 'Buenos Aires', 'mail@algo.com', 'dominio.com', '2526-5025', 'Pintura');
+insert into proveedores values (9, 'proveedor pint', now(), 'Ramos Mejia', '1262', 'Buenos Aires', 'mail@algo.com', 'dominio.com', '2526-5025', 'Pintura');
 
-insert into proveedores values ('proveedor electrico', now(), 'Olivos', '1262', 'Buenos Aires', 'mail@algo.com', 'dominio.com', '2526-5025', 'Electrico');
+insert into proveedores values (12, 'proveedor pint', now(), 'CABA', '1262', 'Buenos Aires', 'mail@algo.com', 'dominio.com', '2526-5025', 'Pintura');
 
-insert into proveedores values ('proveedor sanitario', now(), 'Olivos', '1262', 'Buenos Aires', 'mail@algo.com', 'dominio.com', '2526-5025', 'Sanitario');
+insert into proveedores values (10, 'proveedor electrico', now(), 'Olivos', '1262', 'Buenos Aires', 'mail@algo.com', 'dominio.com', '2526-5025', 'Electrico');
+
+insert into proveedores values (11, 'proveedor sanitario', now(), 'Olivos', '1262', 'Buenos Aires', 'mail@algo.com', 'dominio.com', '2526-5025', 'Sanitario');
 
 
 select * from proveedores; 
@@ -162,28 +179,34 @@ select localidad, nombre_del_proveedor, count(*) from proveedores group by local
 
 
 --12 Obtener el promedio de proveedores que hay por localidad.
-select localidad, avg(cantidad) from (
-	select localidad, count(nombre_del_proveedor) as "cantidad" from proveedores group by localidad
-) sub_query
-group by sub_query.localidad;
+select 
+	cast(count(distinct nombre_del_proveedor) as decimal ) / count(distinct localidad) as "promedio",
+	count(distinct nombre_del_proveedor) as "cantidad proveedores", 
+	count(distinct localidad) as "cantidad localidades"
+from proveedores;
 
 
 -- 13 Obtener los rubros que hay por localidad.
 select distinct localidad, nombre_del_rubro from proveedores order by localidad;
 
---14 Obtener el promedio de rubros por localidad.
+--14 Obtener el promedio de rubros por localidad
+-- Una localidad con 5 rubros y otra localidad con 8 rubros => 13 / 2
+
+select cast (count(distinct nombre_del_rubro) as decimal) / count(distinct localidad) as "promedio" from proveedores;
 
 -- 15 Obtener los proveedores que no sean ni de Bs.As. ni de Olivos.
-select * from proveedores where upper(provincia) not like 'BUENOS AIRES' and localidad not ilike 'olivos' ;
+select * from proveedores where upper(localidad) not like 'CABA' and localidad not ilike 'olivos' ;
 
 -- 16. Obtener el promedio de los proveedores por Rubro.
+select cast (count(codigo_proveedor) as decimal) / count(distinct nombre_del_rubro) as "promedio" from proveedores;
 
 -- 17. Obtener la localidades donde existan proveedores de sanitarios y pinturas.
-select distinct localidad from proveedores where nombre_del_rubro  in ('sanitarios', 'pinturas');
+select distinct localidad from proveedores where nombre_del_rubro  in ('Sanitario', 'Pintura');
+
 
 -- 18. Obtener los rubros para los cuales no existan proveedores de la ciudad de Bs. As.
 select nombre_del_rubro from proveedores 
-where localidad not ilike 'CABA' and nombre_del_rubro not in (
+where nombre_del_rubro not in (
 	select nombre_del_rubro from proveedores where localidad ilike 'CABA'
 );
 
@@ -192,7 +215,7 @@ select localidad
 from proveedores
 where nombre_del_rubro in ('Electrico', 'Sanitario')
 group by localidad
-having count(1) >= 2;
+having count(*) = 2;
 
 -- 20. Obtener las localidades donde existan proveedores de todos los rubros.
 
