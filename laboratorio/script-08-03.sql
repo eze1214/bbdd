@@ -104,9 +104,9 @@ insert into proveedores values (9, 'proveedor pint', now(), 'Ramos Mejia', '1262
 
 insert into proveedores values (12, 'proveedor pint', now(), 'CABA', '1262', 'Buenos Aires', 'mail@algo.com', 'dominio.com', '2526-5025', 'Pintura');
 
-insert into proveedores values (10, 'proveedor electrico', now(), 'Olivos', '1262', 'Buenos Aires', 'mail@algo.com', 'dominio.com', '2526-5025', 'Electrico');
+insert into proveedores values (10, 'proveedor electrico', now(), 'CABA', '1262', 'Buenos Aires', 'mail@algo.com', 'dominio.com', '2526-5025', 'Electrico');
 
-insert into proveedores values (11, 'proveedor sanitario', now(), 'Olivos', '1262', 'Buenos Aires', 'mail@algo.com', 'dominio.com', '2526-5025', 'Sanitario');
+insert into proveedores values (11, 'proveedor sanitario', now(), 'CABA', '1262', 'Buenos Aires', 'mail@algo.com', 'dominio.com', '2526-5025', 'Sanitario');
 
 
 select * from proveedores; 
@@ -219,7 +219,7 @@ having count(*) = 2;
 
 -- 20. Obtener las localidades donde existan proveedores de todos los rubros.
 
-select localidad
+select localidad, count(nombre_del_rubro)
 from proveedores
 group by localidad 
 having count(nombre_del_rubro) = (select count(distinct nombre_del_rubro) from proveedores );
