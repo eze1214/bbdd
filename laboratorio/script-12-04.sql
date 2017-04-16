@@ -144,31 +144,42 @@ select distinct nota from notas order by nota desc;
 -- 1.2 Para cada materia, devuelva en su primer columna el código de departamento y el
 -- número de materia en el formato “XX.YY” (llámesela “código”) y en la segunda
 -- columna el nombre, ordenado el listado por nombre descendente
-select codigo || '.' || LPAD(numero::text, 2, '0') as "codigo", nombre from materias order by nombre desc;
+select to_char(codigo, 'fm00') || '.' || LPAD(numero::text, 2, '0') as "codigo", nombre from materias order by nombre desc;
 
 
 -- 1.3 Para cada nota registrada, devuelva el padrón, código de departamento, número de
 -- materia, fecha y nota expresada como un valor entre 1 y 100. Mostrar los resultados
 -- paginados en páginas de 5 resultados cada una, devolviendo la tercer página
-select padron, codigo, numero, fecha, nota * 10 as "nota" from notas limit 5 offset 2;
+select padron, codigo, numero, fecha, nota * 10 as "nota" from notas order by 1,2,3,4,5 limit 5 offset 10;
+
+-- esta forma es la sql estandar
+select padron, codigo, numero, fecha, nota * 10 as "nota" from notas order by padron, codigo, numero, fecha offset 10 FETCH FIRST 5 ROWS ONLY;
 
 -- 2.1 Devuelva el padrón y nombre de los alumnos cuyo apellido es “molina”. Asuma
 -- que no sabe cómo se almacenó dicho valor
-select * from alumnos where apellido ilike 'molina';
+select padron, apellido, nombre from alumnos where apellido ilike 'molina';
+select padron, apellido, nombre from alumnos where lower(apellido) = 'molina';
 
 -- 2.2 Devuelva el padrón de los alumnos que ingresaron en la facultad en 2010
 select * from alumnos where fecha_ingreso between '2010-01-01' and '2010-12-31';
 select * from alumnos where date_part('year', fecha_ingreso) = 2010;
+select * from alumnos where EXTRACT (YEAR FROM fecha_ingreso) = 2010;
 
 -- 2.3 Devuelva el apellido y padrón de aquellos alumnos cuyo nombre es Daniel, Miguel
 -- o Clemente y su padrón es mayor a 72000
 select apellido, padron from alumnos where nombre in ('Daniel', 'Miguel', 'Clemente') and padron > 72000;
+select apellido, padron from alumnos where (nombre ilike 'daniel' or nombre ilike 'miguel' or nombre ilike 'clemente') and padron > 72000;
 
 -- 3.1 Devolver nombre de departamento y nombre de materia para cada materia,
 -- ordenado por nombre de materia
 select d.nombre, m.nombre 
 from materias m
 inner join departamentos d on m.codigo = d.codigo
+order by m.nombre;
+
+select d.nombre, m.nombre 
+from materias m
+inner join departamentos d using (codigo)
 order by m.nombre;
 
 -- 3.2 Para cada carrera, listar su código y el padrón de los alumnos que estén inscriptos
@@ -179,12 +190,27 @@ from carreras c
 left join inscripto_en i on c.codigo = i.codigo
 order by c.codigo, i.padron;
 
+select c.codigo, i.padron
+from inscripto_en i
+right join carreras c on c.codigo = i.codigo
+order by c.codigo, i.padron;
+
+select c.codigo, i.padron
+from inscripto_en i
+right join carreras c on c.codigo = i.codigo
+order by i.padron NULLS LAST;
+
 -- 3.3 Para cada alumno, mostrar su padrón y la o las notas que tuvo en la materia 71.14.
 -- Incluir también a los alumnos que no tengan nota en la materia. Ordenar por padrón.
 select a.padron, n.nota
 from alumnos a
 left join notas n on a.padron = n.padron
 where n.codigo is null or (n.codigo = 71 and n.numero = 14)
+order by a.padron;
+
+select a.padron, n.nota
+from alumnos a
+left join notas n on (a.padron = n.padron and n.codigo = 71 and n.numero = 14)
 order by a.padron;
 
 -- 3.4 Obtener el padrón de los alumnos que aprobaron al menos 3 materias con nota
@@ -195,6 +221,15 @@ from notas
 where nota >= 5
 group by padron 
 having count(nota) >= 3;
+
+select distinct n1.padron
+from notas n1, notas n2, notas n3
+WHERE
+n1.padron = n2.padron and n2.padron = n3.padron
+and n1.nota >= 5 and n2.nota >= 5 and n3.nota >= 5
+and (n1.codigo <> n2.codigo OR n1.numero <> n2.numero)
+and (n1.codigo <> n3.codigo OR n1.numero <> n3.numero)
+and (n2.codigo <> n3.codigo OR n2.numero <> n3.numero);
 
 -- 4.1 Obtener el padrón, nombre y apellido de los alumnos que tienen el mismo apellido
 -- que el alumno de padrón 71000
@@ -210,6 +245,14 @@ from alumnos
 where apellido = (select apellido from alumnos where padron = 71000)
 and padron != 71000;
 
+select padron, nombre, apellido 
+from alumnos
+where apellido = ALL (select apellido from alumnos where padron = 71000) -- ALL apellido igual a TODOS, SOME apellido igual al menos uno
+-- apellido > ALL => apellido mayor a todos
+-- apellido > SOME => apellido mayor a alguno
+and padron != 71000;
+
+
 -- 4.2 Obtener el padrón de los alumnos que aprobaron la materia 71.14 y no aprobaron
 -- la materia 71.15
 -- REVISAR!!
@@ -224,6 +267,18 @@ OR
 	NOT EXISTS (select 1 from notas noexiste where mat14.padron = noexiste.padron and noexiste.codigo = 71 and numero = 15)
 )
 order by mat14.padron;
+
+select padron
+from alumnos
+where padron = ANY (select padron from notas where codigo = 71 and numero = 14 and nota >= 4)
+-- = ANY  <===> IN
+and padron <> ALL (select padron from notas where codigo = 71 and numero = 15 and nota >= 4);
+-- <> ANY <====> NOT IN
+
+select padron
+from alumnos a
+where EXISTS (select padron from notas n1 where codigo = 71 and numero = 14 and nota >= 4 AND n1.padron = a.padron)
+and NOT EXISTS (select 1 from notas n2 where codigo = 71 and numero = 15 and nota >= 4 AND n2.padron = a.padron);
 
 -- 4.3 Obtener el padrón y apellido de los alumnos que tienen nota en todas las materias
 -- REVISAR!!!
