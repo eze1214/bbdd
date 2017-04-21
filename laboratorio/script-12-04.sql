@@ -294,6 +294,30 @@ left join
 where faltantes.padron is null
 order by padron;
 
+-- La posta
+-- No exista una materia para la que un alumno no tenga nota
+-- no exista una nota para una materia
+select padron, apellido 
+from alumnos a
+where NOT EXISTS (
+	select * from materias m -- que no exista una materia
+	where  NOT EXISTS (
+		select * from notas n
+		where n.padron = a.padron
+		and n.codigo = m.codigo
+		and n.numero = m.numero
+	)
+);
+
+select padron, apellido from alumnos a
+-- Que la resta entre todas las materias y las que tiene nota sea conjunto vacio
+where not exists (
+	select codigo, numero from materias m -- todas las materias
+	except
+	select codigo, numero from notas n -- menos las que el alumno tiene nota
+	where n.padron = a.padron
+);
+
 -- 4.4 Obtener el padrón y apellido de los alumnos de intercambio que tienen nota en
 -- todas las materias
 -- Igual al anterior, pero agrego filtro en alumnos
@@ -309,6 +333,17 @@ left join
 where faltantes.padron is null and alumnos.intercambio = 't'
 order by padron;
 
+select padron, apellido from alumnos a
+-- Que la resta entre todas las materias y las que tiene nota sea conjunto vacio
+where not exists (
+	select codigo, numero from materias m -- todas las materias
+	except
+	select codigo, numero from notas n -- menos las que el alumno tiene nota
+	where n.padron = a.padron
+)
+and a.intercambio = true;
+
+
 -- 4.5 Obtener el padrón y apellido de los alumnos que tienen nota en todas las materias
 -- del departamento 75
 select distinct alumnos.padron, apellido from notas
@@ -321,6 +356,16 @@ select padron, codigo, numero from notas
 where faltantes.padron is null
 order by padron;
 
+select padron, apellido from alumnos a
+-- Que la resta entre todas las materias y las que tiene nota sea conjunto vacio
+where not exists (
+	select codigo, numero from materias m -- todas las materias
+	where m.codigo = 75
+	except
+	select codigo, numero from notas n -- menos las que el alumno tiene nota
+	where n.padron = a.padron
+);
+
 -- 4.6 Obtener el padrón y apellido de los alumnos que aprobaron todas las materias
 select alumnos.padron, alumnos.apellido
 from alumnos 
@@ -331,11 +376,22 @@ select padron, codigo, numero from notas where nota >=4
 ) faltantes on alumnos.padron = faltantes.padron
 where faltantes.padron is null;
 
+select padron, apellido from alumnos a
+-- Que la resta entre todas las materias y las que tiene nota sea conjunto vacio
+where not exists (
+	select codigo, numero from materias m -- todas las materias
+	except
+	select codigo, numero from notas n -- menos las que el alumno tiene nota
+	where n.padron = a.padron and n.nota >= 4
+);
+
 -- 5.1 Devuelva cuántos alumnos tienen al menos una nota mayor o igual a 7
 -- REVISAR!!
 select count(1) from (
 	select padron, count(nota) from notas where nota >= 7 group by padron
 ) sub;
+
+select count(distinct padron) from notas where nota >= 7 ;
 
 -- 5.2 Devuelva el padrón de los alumnos que se hayan sacado la mejor nota en materias
 -- del departamento 75
@@ -348,6 +404,10 @@ inner join notas n2 on n1.codigo = n2.codigo and n1.numero = n2.numero
 where n1.nota > n2.nota
 order by padron;
 
+select padron from notas
+where nota = (select max(nota) from notas where codigo = 75)
+and codigo = 75;
+
 -- 5.3 Para cada alumno, obtenga el padrón y su promedio de notas
 select a.padron, avg(nota)
 from alumnos a
@@ -356,13 +416,65 @@ group by a.padron order by a.padron;
 
 -- 5.4 Para cada alumno que tenga un promedio de nota mayor a 5, indicar su padrón,
 -- apellido y cantidad de materias en las que tiene nota
-select notas.padron, apellido , count(nota) as "cantidad materias" , avg(nota) as "promedio"
+select notas.padron, apellido , count(nota) as "cantidad materias"
+from notas
+inner join alumnos on notas.padron = alumnos.padron
+group by notas.padron, apellido having avg(nota) > 5;
+
+select notas.padron, apellido , count(distinct codigo::text || numero::text) as "cantidad materias"
+from notas
+inner join alumnos on notas.padron = alumnos.padron
+group by notas.padron, apellido having avg(nota) > 5;
+
+select notas.padron, apellido , count(distinct to_char(codigo, 'fm00') || to_char(numero, 'fm00')) as "cantidad materias"
 from notas
 inner join alumnos on notas.padron = alumnos.padron
 group by notas.padron, apellido having avg(nota) > 5;
 
 -- 5.5 Obtener el padrón de los alumnos que aprobaron la mayor cantidad de materias
 select padron 
-from notas 
-where nota >= 4
-group by padron having count(1) = (select count(1) from materias);
+from notas n
+where n.nota >= 4
+group by padron having count(1) = (select count(distinct codigo::text || numero::text) from notas where nota >= 4);
+
+
+select n.padron
+from notas n
+where n.nota >= 4
+group by n.padron having count(*) >= ALL (
+	select count(*)
+	from notas n
+	where n.nota >= 4
+	group by n.padron
+);
+
+
+update empleados set sueldo = sueldo *1.1 where sector_supervisor = 2;
+
+update empleados set sueldo = sueldo * 1.5 where sector_supervisor <> 2 
+or sector_supervisor is null;
+-- or sector_supervisor = NULL
+
+
+-- Y el nulo ????
+select * from empleados;
+
+select codigo, nombre from sectores s
+where not exists (select 1 from empleados e where e.sector_supervisor = s.codigo);
+
+-- Tener cuidado con que subconsultas no devuelvan valores nulos
+select codigo, nombre from sectores s
+where s.codigo not in (select e.sector_supervisor from empleados e where e.sector_supervisor is not null);
+
+select legajo, nombre, sector_supervisor from empleados e
+order by sector_supervisor NULLS FIRST;
+
+
+-- Para cada sector cuantos empleados supervisan a dicho sector
+-- incluir sectores que no supervisan ningun empleado
+select s.codigo, s.nombre, count(e.legajo)
+from empleados e 
+right join sectores s on e.sector_supervisor = s.codigo
+group by s.codigo, s.nombre
+order by s.codigo
+;
